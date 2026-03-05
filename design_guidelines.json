@@ -1,0 +1,138 @@
+{
+  "design_system": {
+    "identity": {
+      "name": "DH POS",
+      "aesthetic": "Refined Hospitality",
+      "core_values": ["Elegance", "Efficiency", "Warmth", "Clarity"],
+      "personas": {
+        "guest": "Hungry, relaxed, expects frictionless service. Mobile-first user.",
+        "admin": "Busy, focused, needs data density and quick actions. Desktop-first user."
+      }
+    },
+    "typography": {
+      "font_family": {
+        "headings": "Playfair Display, serif",
+        "body": "Plus Jakarta Sans, sans-serif",
+        "mono": "JetBrains Mono, monospace"
+      },
+      "scale": {
+        "h1": "text-4xl md:text-5xl font-bold tracking-tight",
+        "h2": "text-3xl md:text-4xl font-semibold tracking-tight",
+        "h3": "text-2xl md:text-3xl font-medium",
+        "body_lg": "text-lg leading-relaxed",
+        "body_base": "text-base leading-relaxed",
+        "caption": "text-sm text-muted-foreground"
+      },
+      "usage": {
+        "guest_headings": "Playfair Display, Deep Forest Green (#1A2E05)",
+        "admin_headings": "Plus Jakarta Sans, Slate-900",
+        "prices": "Plus Jakarta Sans, Gold (#D4AF37) or Dark Green"
+      }
+    },
+    "colors": {
+      "palette": {
+        "primary": {
+          "DEFAULT": "#1A2E05",
+          "foreground": "#FFFFFF",
+          "description": "Deep Forest Green - Headings, Primary Actions (Guest)"
+        },
+        "secondary": {
+          "DEFAULT": "#D4AF37",
+          "foreground": "#0F172A",
+          "description": "Gold - Accents, Borders, Highlights, Active States"
+        },
+        "background": {
+          "DEFAULT": "#F5F5F0",
+          "admin": "#F8FAFC",
+          "sidebar": "#0F172A",
+          "description": "Warm Sand (Guest) / Slate-50 (Admin Main) / Dark Slate (Admin Sidebar)"
+        },
+        "surface": {
+          "DEFAULT": "#FFFFFF",
+          "glass": "rgba(255, 255, 255, 0.6)",
+          "description": "Card backgrounds"
+        },
+        "status": {
+          "success": "#10B981",
+          "warning": "#F59E0B",
+          "error": "#EF4444",
+          "info": "#3B82F6"
+        }
+      },
+      "gradients": {
+        "gold_shimmer": "linear-gradient(45deg, #D4AF37, #FCD34D, #D4AF37)",
+        "dark_overlay": "linear-gradient(to bottom, rgba(15, 23, 42, 0), rgba(15, 23, 42, 0.8))"
+      }
+    },
+    "layout": {
+      "spacing": {
+        "container_padding": "p-4 md:p-8 lg:p-12",
+        "section_gap": "gap-8 md:gap-12",
+        "card_padding": "p-6"
+      },
+      "grids": {
+        "guest_menu": "grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6",
+        "admin_dashboard": "grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4",
+        "kds_board": "grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4"
+      },
+      "radius": {
+        "default": "rounded-lg",
+        "card": "rounded-xl",
+        "button": "rounded-full"
+      }
+    },
+    "components": {
+      "buttons": {
+        "primary": "bg-[#1A2E05] text-white hover:bg-[#1A2E05]/90 rounded-full px-8 py-3 font-medium transition-all active:scale-95 shadow-lg hover:shadow-xl",
+        "secondary": "bg-transparent border-2 border-[#1A2E05] text-[#1A2E05] hover:bg-[#1A2E05]/5 rounded-full px-8 py-3 font-medium transition-all",
+        "accent": "bg-[#D4AF37] text-[#0F172A] hover:bg-[#D4AF37]/90 rounded-full px-6 py-2 font-bold shadow-md"
+      },
+      "cards": {
+        "guest_item": "bg-white/60 backdrop-blur-md border border-white/20 shadow-sm hover:shadow-md transition-all rounded-xl overflow-hidden group",
+        "admin_stat": "bg-white border border-slate-200 shadow-sm rounded-lg p-6",
+        "kds_ticket": "bg-slate-800 text-slate-50 border-l-4 border-l-blue-500 rounded-md p-4 shadow-md"
+      },
+      "inputs": {
+        "default": "bg-white/50 border-slate-200 focus:border-[#D4AF37] focus:ring-[#D4AF37] rounded-lg"
+      }
+    },
+    "motion": {
+      "transitions": "transition-all duration-300 ease-out",
+      "hover_lift": "hover:-translate-y-1 hover:shadow-lg",
+      "page_enter": "animate-in fade-in slide-in-from-bottom-4 duration-500",
+      "micro_interactions": "active:scale-95 duration-100"
+    },
+    "assets": {
+      "images": {
+        "landing_hero": "https://images.unsplash.com/photo-1768697358705-c1b60333da35?crop=entropy&cs=srgb&fm=jpg&q=85",
+        "login_bg": "https://images.unsplash.com/photo-1768949005507-8c0f571285f4?crop=entropy&cs=srgb&fm=jpg&q=85",
+        "food_pasta": "https://images.unsplash.com/photo-1630563775062-bbaf8ad3d73c?crop=entropy&cs=srgb&fm=jpg&q=85",
+        "food_burger": "https://images.unsplash.com/photo-1650012762279-e8b5f90f504f?crop=entropy&cs=srgb&fm=jpg&q=85",
+        "food_dessert": "https://images.unsplash.com/photo-1609582848349-215e8bf397d3?crop=entropy&cs=srgb&fm=jpg&q=85",
+        "food_drink": "https://images.pexels.com/photos/3925158/pexels-photo-3925158.jpeg"
+      },
+      "icons": "Lucide React (default) or Phosphor Icons (for refined look)"
+    }
+  },
+  "implementation_rules": {
+    "general": [
+      "Use 'sonner' for all toast notifications.",
+      "Ensure all interactive elements have 'data-testid' attributes.",
+      "Do NOT use generic 'Inter' font. Import Playfair Display and Plus Jakarta Sans.",
+      "Mobile-first for Guest pages (QR flow).",
+      "Desktop-first for Admin pages."
+    ],
+    "guest_flow": [
+      "Background must be #F5F5F0 (Warm Sand).",
+      "Use Glassmorphism for cards and sticky navs.",
+      "Images should be high-quality, full-width on mobile cards.",
+      "Price tags should be prominent, using the Gold accent color."
+    ],
+    "admin_flow": [
+      "Sidebar must be #0F172A (Dark Slate) with Gold active states.",
+      "Main content area should be clean white/gray.",
+      "KDS (Kitchen Display) should default to Dark Mode for contrast.",
+      "Use dense tables for order lists."
+    ]
+  }
+}
