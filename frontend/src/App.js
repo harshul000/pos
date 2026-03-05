@@ -109,6 +109,14 @@ function App() {
                   </ProtectedRoute>
                 }
               />
+              <Route
+                path="/admin/qr-code"
+                element={
+                  <ProtectedRoute>
+                    <QRCodePage />
+                  </ProtectedRoute>
+                }
+              />
 
               <Route path="/" element={<Navigate to="/admin/login" replace />} />
               <Route path="*" element={<Navigate to="/admin/login" replace />} />
