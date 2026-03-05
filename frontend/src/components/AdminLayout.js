@@ -34,13 +34,13 @@ const AdminLayout = ({ children }) => {
   };
 
   return (
-    <div className=\"flex h-screen bg-slate-50\">
-      <aside className=\"w-64 bg-[#0F172A] text-white flex flex-col\" data-testid=\"admin-sidebar\">
-        <div className=\"p-6 border-b border-slate-700\">
-          <h1 className=\"text-2xl font-bold\" style={{ fontFamily: \"'Playfair Display', serif\" }}>
+    <div className="flex h-screen bg-slate-50">
+      <aside className="w-64 bg-[#0F172A] text-white flex flex-col" data-testid="admin-sidebar">
+        <div className="p-6 border-b border-slate-700">
+          <h1 className="text-2xl font-bold" style={{ fontFamily: "'Playfair Display', serif" }}>
             DH POS
           </h1>
-          <p className=\"text-sm text-slate-400 mt-1\">{user?.full_name}</p>
+          <p className="text-sm text-slate-400 mt-1">{user?.full_name}</p>
         </div>
 
         <nav className=\"flex-1 p-4 space-y-2\">
