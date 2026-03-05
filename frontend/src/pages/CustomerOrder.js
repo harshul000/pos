@@ -114,15 +114,64 @@ const CustomerOrder = () => {
 
       const response = await axios.post(`${API}/public/orders`, orderData);
       const order = response.data;
-      
-      clearCart();
-      toast.success('Order placed successfully!');
-      navigate(`/order-status/${order.id}`);
+
+      if (paymentMethod === 'online') {
+        // Razorpay payment flow
+        const paymentResponse = await axios.post(
+          `${API}/payments/razorpay/order?order_id=${order.id}`
+        );
+        
+        const options = {
+          key: paymentResponse.data.key_id,
+          amount: paymentResponse.data.amount,
+          currency: paymentResponse.data.currency,
+          order_id: paymentResponse.data.razorpay_order_id,
+          name: outlet.name,
+          description: `Order ${order.order_number}`,
+          handler: async (razorpayResponse) => {
+            try {
+              await axios.post(`${API}/payments/razorpay/verify`, {
+                razorpay_order_id: razorpayResponse.razorpay_order_id,
+                razorpay_payment_id: razorpayResponse.razorpay_payment_id,
+                razorpay_signature: razorpayResponse.razorpay_signature
+              });
+              
+              clearCart();
+              toast.success('Payment successful!');
+              navigate(`/order-status/${order.id}`);
+            } catch (error) {
+              toast.error('Payment verification failed');
+            }
+          },
+          prefill: {
+            name: guestName
+          },
+          theme: {
+            color: '#1A2E05'
+          },
+          modal: {
+            ondismiss: () => {
+              setSubmitting(false);
+              toast.error('Payment cancelled');
+            }
+          }
+        };
+
+        const razorpay = new window.Razorpay(options);
+        razorpay.open();
+      } else {
+        // Pay at counter
+        clearCart();
+        toast.success('Order placed! Pay at counter after your meal.');
+        navigate(`/order-status/${order.id}`);
+      }
     } catch (error) {
       toast.error('Failed to place order');
       console.error(error);
     } finally {
-      setSubmitting(false);
+      if (paymentMethod === 'counter') {
+        setSubmitting(false);
+      }
     }
   };
 
