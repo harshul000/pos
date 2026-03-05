@@ -2,6 +2,7 @@ import qrcode
 from io import BytesIO
 import base64
 from typing import Optional
+import os
 
 def generate_qr_code(data: str, size: int = 10) -> str:
     qr = qrcode.QRCode(
@@ -22,7 +23,7 @@ def generate_qr_code(data: str, size: int = 10) -> str:
     img_base64 = base64.b64encode(buffer.getvalue()).decode()
     return f"data:image/png;base64,{img_base64}"
 
-def get_qr_url(qr_token: str, base_url: Optional[str] = None) -> str:
+def get_qr_url(qr_token: str = None, base_url: Optional[str] = None) -> str:
     if not base_url:
-        base_url = "https://dhpos.com"
-    return f"{base_url}/qr/{qr_token}"
+        base_url = os.environ.get('REACT_APP_BACKEND_URL', 'https://bistro-checkout-4.preview.emergentagent.com')
+    return f"{base_url}/order"
