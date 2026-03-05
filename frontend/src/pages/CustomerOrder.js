@@ -44,10 +44,8 @@ const CustomerOrder = () => {
         const firstOutlet = outletsRes.data[0];
         setOutlet(firstOutlet);
         
-        const [menuRes, tablesRes] = await Promise.all([
-          axios.get(`${API}/menu/${firstOutlet.id}`),
-          axios.get(`${API}/admin/tables/${firstOutlet.id}`)
-        ]);
+        const menuRes = await axios.get(`${API}/menu/${firstOutlet.id}`);
+        const tablesRes = await axios.get(`${API}/admin/tables/${firstOutlet.id}`);
         
         setMenu(menuRes.data);
         setTables(tablesRes.data.filter(t => t.status === 'available'));
@@ -57,6 +55,7 @@ const CustomerOrder = () => {
         }
       }
     } catch (err) {
+      console.error('Error loading data:', err);
       toast.error('Failed to load menu');
     } finally {
       setLoading(false);
