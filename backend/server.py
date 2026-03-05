@@ -217,6 +217,18 @@ async def get_menu_item(item_id: str):
         raise HTTPException(status_code=404, detail="Menu item not found")
     return item
 
+@api_router.get("/public/outlets")
+async def get_public_outlets():
+    db = get_database()
+    outlets = await db.outlets.find({"is_active": True}, {"_id": 0}).to_list(100)
+    return outlets
+
+@api_router.get("/public/tables/{outlet_id}")
+async def get_public_tables(outlet_id: str):
+    db = get_database()
+    tables = await db.tables.find({"outlet_id": outlet_id, "status": "available"}, {"_id": 0}).to_list(100)
+    return tables
+
 @api_router.get("/qr/{qr_token}")
 async def get_qr_info(qr_token: str):
     db = get_database()
