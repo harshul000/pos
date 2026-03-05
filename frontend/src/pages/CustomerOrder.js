@@ -359,10 +359,14 @@ const CustomerOrder = () => {
             className="w-full bg-[#D4AF37] hover:bg-[#D4AF37]/90 text-[#0F172A] rounded-full py-6 text-lg font-bold shadow-lg disabled:opacity-50"
             data-testid="place-order-button"
           >
-            {submitting ? 'Processing...' : `Place Order - ₹${total.toFixed(2)}`}
+            {submitting ? 'Processing...' : 
+              paymentMethod === 'online' ? `Pay Now - ₹${total.toFixed(2)}` : `Place Order - ₹${total.toFixed(2)}`
+            }
           </Button>
           
-          <p className="text-center text-sm text-slate-600 mt-4">Pay at counter after your meal</p>
+          <p className="text-center text-sm text-slate-600 mt-4">
+            {paymentMethod === 'online' ? 'Secure payment via Razorpay' : 'Pay at counter after your meal'}
+          </p>
         </div>
       </div>
     );
