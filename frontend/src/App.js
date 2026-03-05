@@ -5,9 +5,7 @@ import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { CartProvider } from "./contexts/CartContext";
 import { Toaster } from "./components/ui/sonner";
 
-import QRLanding from "./pages/QRLanding";
-import MenuPage from "./pages/MenuPage";
-import CheckoutPage from "./pages/CheckoutPage";
+import CustomerOrder from "./pages/CustomerOrder";
 import OrderStatusPage from "./pages/OrderStatusPage";
 
 import AdminLogin from "./pages/admin/AdminLogin";
