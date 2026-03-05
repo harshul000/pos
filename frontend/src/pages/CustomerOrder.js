@@ -112,7 +112,7 @@ const CustomerOrder = () => {
         notes: notes || null
       };
 
-      const response = await axios.post(`${API}/orders`, orderData);
+      const response = await axios.post(`${API}/public/orders`, orderData);
       const order = response.data;
       
       clearCart();
