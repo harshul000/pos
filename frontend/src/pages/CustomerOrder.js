@@ -39,16 +39,16 @@ const CustomerOrder = () => {
 
   const fetchData = async () => {
     try {
-      const outletsRes = await axios.get(`${API}/admin/outlets`);
+      const outletsRes = await axios.get(`${API}/public/outlets`);
       if (outletsRes.data.length > 0) {
         const firstOutlet = outletsRes.data[0];
         setOutlet(firstOutlet);
         
         const menuRes = await axios.get(`${API}/menu/${firstOutlet.id}`);
-        const tablesRes = await axios.get(`${API}/admin/tables/${firstOutlet.id}`);
+        const tablesRes = await axios.get(`${API}/public/tables/${firstOutlet.id}`);
         
         setMenu(menuRes.data);
-        setTables(tablesRes.data.filter(t => t.status === 'available'));
+        setTables(tablesRes.data);
         
         if (menuRes.data.length > 0) {
           setSelectedCategory(menuRes.data[0].category.id);
