@@ -342,6 +342,87 @@ async def create_qr_order(qr_token: str, order_data: QROrderCreate):
     order_with_items = {**order, "items": order_items, "table_number": table["table_number"]}
     return OrderWithItems(**order_with_items)
 
+@api_router.post("/public/orders", response_model=OrderWithItems)
+async def create_public_order(order_data: OrderCreate):
+    """Create a public order without authentication for customer ordering"""
+    db = get_database()
+    
+    outlet = await db.outlets.find_one({"id": order_data.outlet_id}, {"_id": 0})
+    if not outlet or not outlet.get("is_active"):
+        raise HTTPException(status_code=404, detail="Outlet not found or inactive")
+    
+    # Verify table exists and is available
+    table = await db.tables.find_one({"id": order_data.table_id}, {"_id": 0})
+    if not table:
+        raise HTTPException(status_code=404, detail="Table not found")
+    
+    order_id = str(uuid.uuid4())
+    order_number = generate_order_number()
+    
+    subtotal = 0.0
+    order_items = []
+    
+    for item_data in order_data.items:
+        menu_item = await db.menu_items.find_one({"id": item_data.menu_item_id}, {"_id": 0})
+        if not menu_item or not menu_item.get("is_available"):
+            raise HTTPException(status_code=400, detail=f"Menu item {item_data.menu_item_id} not available")
+        
+        item_subtotal = menu_item["price"] * item_data.quantity
+        subtotal += item_subtotal
+        
+        order_item = {
+            "id": str(uuid.uuid4()),
+            "order_id": order_id,
+            "menu_item_id": item_data.menu_item_id,
+            "quantity": item_data.quantity,
+            "unit_price": menu_item["price"],
+            "subtotal": item_subtotal,
+            "special_instructions": item_data.special_instructions,
+            "status": OrderItemStatus.PENDING
+        }
+        order_items.append(order_item)
+    
+    tax_amount = subtotal * 0.05
+    total_amount = subtotal + tax_amount
+    
+    order = {
+        "id": order_id,
+        "order_number": order_number,
+        "outlet_id": order_data.outlet_id,
+        "table_id": order_data.table_id,
+        "guest_user_id": None,
+        "guest_name": order_data.guest_name,
+        "order_type": order_data.order_type,
+        "status": OrderStatus.PENDING,
+        "subtotal": subtotal,
+        "tax_amount": tax_amount,
+        "discount_amount": 0.0,
+        "total_amount": total_amount,
+        "notes": order_data.notes,
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "updated_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    await db.orders.insert_one(order)
+    await db.order_items.insert_many(order_items)
+    
+    if order_data.table_id:
+        await db.tables.update_one(
+            {"id": order_data.table_id},
+            {"$set": {"status": TableStatus.OCCUPIED}}
+        )
+    
+    await redis_cache.clear_pattern(f"orders:*")
+    
+    table_number = None
+    if order_data.table_id:
+        table = await db.tables.find_one({"id": order_data.table_id}, {"_id": 0})
+        if table:
+            table_number = table["table_number"]
+    
+    order_with_items = {**order, "items": order_items, "table_number": table_number}
+    return OrderWithItems(**order_with_items)
+
 @api_router.get("/orders", response_model=List[OrderWithItems])
 async def get_orders(
     outlet_id: Optional[str] = None,
