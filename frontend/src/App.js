@@ -16,6 +16,7 @@ import MenuManagement from "./pages/admin/MenuManagement";
 import TableManagement from "./pages/admin/TableManagement";
 import Analytics from "./pages/admin/Analytics";
 import Settings from "./pages/admin/Settings";
+import QRCodePage from "./pages/admin/QRCodePage";
 
 const ProtectedRoute = ({ children }) => {
   const { user, loading, isAdmin } = useAuth();
