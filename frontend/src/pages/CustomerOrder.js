@@ -317,19 +317,56 @@ const CustomerOrder = () => {
                   data-testid="special-instructions-input"
                 />
               </div>
+            </div>
+          </div>
+
+          <div className="bg-white/60 backdrop-blur-md rounded-xl p-6 border border-white/20 mb-6">
+            <h2 className="text-xl font-bold text-[#1A2E05] mb-4">Payment Method</h2>
+            
+            <div className="space-y-3">
+              <button
+                onClick={() => setPaymentMethod('online')}
+                className={`w-full p-4 rounded-lg border-2 text-left transition-all ${
+                  paymentMethod === 'online'
+                    ? 'border-[#1A2E05] bg-[#1A2E05]/5'
+                    : 'border-slate-300 hover:border-slate-400'
+                }`}
+                data-testid="payment-online"
+              >
+                <div className="flex items-center justify-between mb-1">
+                  <div className="font-semibold text-[#1A2E05]">Pay Now (Online)</div>
+                  {paymentMethod === 'online' && (
+                    <div className="w-5 h-5 rounded-full bg-[#1A2E05] flex items-center justify-center">
+                      <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                      </svg>
+                    </div>
+                  )}
+                </div>
+                <div className="text-sm text-slate-600">Pay securely with Razorpay (Cards, UPI, Wallets)</div>
+              </button>
               
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Payment Method *</label>
-                <Select value={paymentMethod} onValueChange={setPaymentMethod}>
-                  <SelectTrigger className="bg-white/50" data-testid="payment-method-select">
-                    <SelectValue placeholder="Choose payment method" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="online">Pay Now (Online)</SelectItem>
-                    <SelectItem value="counter">Pay at Counter</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+              <button
+                onClick={() => setPaymentMethod('counter')}
+                className={`w-full p-4 rounded-lg border-2 text-left transition-all ${
+                  paymentMethod === 'counter'
+                    ? 'border-[#1A2E05] bg-[#1A2E05]/5'
+                    : 'border-slate-300 hover:border-slate-400'
+                }`}
+                data-testid="payment-counter"
+              >
+                <div className="flex items-center justify-between mb-1">
+                  <div className="font-semibold text-[#1A2E05]">Pay at Counter</div>
+                  {paymentMethod === 'counter' && (
+                    <div className="w-5 h-5 rounded-full bg-[#1A2E05] flex items-center justify-center">
+                      <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                      </svg>
+                    </div>
+                  )}
+                </div>
+                <div className="text-sm text-slate-600">Pay after your meal with Cash/Card/UPI</div>
+              </button>
             </div>
           </div>
 
