@@ -317,6 +317,19 @@ const CustomerOrder = () => {
                   data-testid="special-instructions-input"
                 />
               </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">Payment Method *</label>
+                <Select value={paymentMethod} onValueChange={setPaymentMethod}>
+                  <SelectTrigger className="bg-white/50" data-testid="payment-method-select">
+                    <SelectValue placeholder="Choose payment method" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="online">Pay Now (Online)</SelectItem>
+                    <SelectItem value="counter">Pay at Counter</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           </div>
 
