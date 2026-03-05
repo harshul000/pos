@@ -24,6 +24,7 @@ const AdminLayout = ({ children }) => {
     { path: '/admin/orders', icon: ShoppingBag, label: 'Orders' },
     { path: '/admin/menu', icon: UtensilsCrossed, label: 'Menu' },
     { path: '/admin/tables', icon: Table2, label: 'Tables' },
+    { path: '/admin/qr-code', icon: Table2, label: 'QR Code' },
     { path: '/admin/analytics', icon: BarChart3, label: 'Analytics' },
     { path: '/admin/settings', icon: Settings, label: 'Settings' },
   ];
