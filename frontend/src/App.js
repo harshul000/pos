@@ -42,9 +42,12 @@ function App() {
         <div className="App">
           <BrowserRouter>
             <Routes>
-              <Route path="/qr/:qrToken" element={<QRLanding />} />
-              <Route path="/qr/:qrToken/menu" element={<MenuPage />} />
-              <Route path="/qr/:qrToken/checkout" element={<CheckoutPage />} />
+              <Route path="/order" element={<CustomerOrder />} />
+              <Route path="/order-status/:orderId" element={<OrderStatusPage />} />
+              
+              <Route path="/qr/:qrToken" element={<CustomerOrder />} />
+              <Route path="/qr/:qrToken/menu" element={<CustomerOrder />} />
+              <Route path="/qr/:qrToken/checkout" element={<CustomerOrder />} />
               <Route path="/qr/:qrToken/order/:orderId" element={<OrderStatusPage />} />
 
               <Route path="/admin/login" element={<AdminLogin />} />
