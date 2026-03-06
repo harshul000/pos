@@ -35,6 +35,8 @@ class PaymentMethod(str, Enum):
     CASH = "cash"
     UPI = "upi"
     CARD = "card"
+    ROOM_CHARGE = "room_charge"
+    COMPLIMENTARY = "complimentary"
 
 class PaymentStatus(str, Enum):
     PENDING = "pending"
@@ -234,3 +236,24 @@ class QROrderCreate(BaseModel):
     guest_name: str
     items: List[OrderItemCreate]
     notes: Optional[str] = None
+
+
+# ─── Waiter Portal Models ──────────────────────────────────────────────────
+
+class ManualOrderCreate(BaseModel):
+    outlet_id: str
+    table_id: Optional[str] = None
+    guest_name: Optional[str] = None
+    cover_count: int = 1
+    order_type: OrderType = OrderType.DINE_IN
+    notes: Optional[str] = None
+    items: List[OrderItemCreate]
+
+
+class AddItemsRequest(BaseModel):
+    items: List[OrderItemCreate]
+
+
+class MarkPaymentRequest(BaseModel):
+    method: PaymentMethod
+    amount_tendered: Optional[float] = None  # for cash change calculation

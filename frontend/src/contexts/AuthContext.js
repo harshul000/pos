@@ -5,9 +5,7 @@ const AuthContext = createContext();
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
+  if (!context) throw new Error('useAuth must be used within an AuthProvider');
   return context;
 };
 
@@ -25,7 +23,7 @@ export const AuthProvider = ({ children }) => {
     } else {
       setLoading(false);
     }
-  }, [token]);
+  }, [token]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const fetchUser = async () => {
     try {
@@ -47,7 +45,19 @@ export const AuthProvider = ({ children }) => {
       const { access_token } = response.data;
       localStorage.setItem('token', access_token);
       setToken(access_token);
-      return { success: true };
+
+      // Fetch user to determine role-based redirect
+      const userResp = await axios.get(`${API}/auth/me`, {
+        headers: { Authorization: `Bearer ${access_token}` }
+      });
+      const userData = userResp.data;
+      setUser(userData);
+
+      // Role-based redirect
+      if (userData.role === 'staff') {
+        return { success: true, redirect: '/waiter/dashboard' };
+      }
+      return { success: true, redirect: '/admin/dashboard' };
     } catch (error) {
       return { success: false, error: error.response?.data?.detail || 'Login failed' };
     }
@@ -71,12 +81,11 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
   };
 
-  const isAdmin = () => {
-    return user && ['super_admin', 'pos_admin', 'staff'].includes(user.role);
-  };
+  const isAdmin = () => user && ['super_admin', 'pos_admin', 'staff'].includes(user.role);
+  const isWaiter = () => user && user.role === 'staff';
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, guestLogin, logout, isAdmin, token }}>
+    <AuthContext.Provider value={{ user, loading, login, guestLogin, logout, isAdmin, isWaiter, token }}>
       {children}
     </AuthContext.Provider>
   );

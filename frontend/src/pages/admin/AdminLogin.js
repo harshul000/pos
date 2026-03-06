@@ -19,19 +19,19 @@ const AdminLogin = () => {
     setLoading(true);
 
     const result = await login(email, password);
-    
+
     if (result.success) {
       toast.success('Login successful');
-      navigate('/admin/dashboard');
+      navigate(result.redirect || '/admin/dashboard');
     } else {
       toast.error(result.error || 'Invalid credentials');
     }
-    
+
     setLoading(false);
   };
 
   return (
-    <div 
+    <div
       className="min-h-screen flex items-center justify-center p-4"
       style={{
         backgroundImage: 'url(https://images.unsplash.com/photo-1768949005507-8c0f571285f4?crop=entropy&cs=srgb&fm=jpg&q=85)',
@@ -40,7 +40,7 @@ const AdminLogin = () => {
       }}
     >
       <div className="absolute inset-0 bg-black/50" />
-      
+
       <Card className="relative w-full max-w-md p-8 bg-white/95 backdrop-blur-sm shadow-2xl" data-testid="admin-login-form">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-[#0F172A] mb-2" style={{ fontFamily: "'Playfair Display', serif" }}>

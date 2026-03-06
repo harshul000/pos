@@ -1,23 +1,36 @@
-from motor.motor_asyncio import AsyncIOMotorClient
 import os
-from typing import Optional
+from pathlib import Path
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
+from sqlalchemy.orm import DeclarativeBase
+from dotenv import load_dotenv
 
-class Database:
-    client: Optional[AsyncIOMotorClient] = None
-    db = None
+ROOT_DIR = Path(__file__).parent
+load_dotenv(ROOT_DIR / '.env')
 
-db_instance = Database()
+DATABASE_URL = os.environ.get("DATABASE_URL", "sqlite+aiosqlite:///./dh_pos.db")
 
-async def connect_to_mongo():
-    mongo_url = os.environ.get('MONGO_URL', 'mongodb://localhost:27017')
-    db_instance.client = AsyncIOMotorClient(mongo_url)
-    db_instance.db = db_instance.client[os.environ.get('DB_NAME', 'dh_pos')]
-    print(f"Connected to MongoDB: {os.environ.get('DB_NAME')}")
+engine = create_async_engine(DATABASE_URL, echo=False)
 
-async def close_mongo_connection():
-    if db_instance.client:
-        db_instance.client.close()
-        print("Closed MongoDB connection")
+AsyncSessionLocal = async_sessionmaker(
+    bind=engine,
+    class_=AsyncSession,
+    expire_on_commit=False,
+)
 
-def get_database():
-    return db_instance.db
+
+class Base(DeclarativeBase):
+    pass
+
+
+async def init_db():
+    async with engine.begin() as conn:
+        from db_models import (  # noqa: F401
+            UserDB, OutletDB, TableDB, MenuCategoryDB, MenuItemDB,
+            OrderDB, OrderItemDB, PaymentDB, CouponDB,
+        )
+        await conn.run_sync(Base.metadata.create_all)
+
+
+async def get_db():
+    async with AsyncSessionLocal() as session:
+        yield session
