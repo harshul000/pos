@@ -21,8 +21,8 @@ from db_models import (
     OrderDB, OrderItemDB, PaymentDB, AppSettingsDB,
 )
 from models import (
-    UserRole, OrderType, OrderStatus, OrderItemStatusRAAS DevigarhRAAS Devigarh,
-    PaymentMethod, PaymentStatus, TableS    tatus,
+    UserRole, OrderType, OrderStatus, OrderItemStatus,
+    PaymentMethod, PaymentStatus, TableStatus,
     UserCreate, UserLogin, GuestLogin, User, Token, TokenData,
     OutletCreate, Outlet,
     TableCreate, Table, 
