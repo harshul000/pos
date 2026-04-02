@@ -1,11 +1,69 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
-import { ChevronLeft, PlusCircle, CreditCard, Banknote, Smartphone, Hotel, Gift, Printer } from 'lucide-react';
+import { CheckCircle2, ChevronLeft, PlusCircle, CreditCard, Banknote, Smartphone, Hotel, Gift, Printer } from 'lucide-react';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
+
+// ── POS Bill component (visible only during print) ──────────────────────────
+const BillPrint = React.forwardRef(({ order }, ref) => (
+    <div ref={ref} id="pos-bill">
+        <style>{`
+            @media print {
+                body > *:not(#pos-bill-root) { display: none !important; }
+                #pos-bill-root { display: block !important; }
+                #pos-bill {
+                    font-family: 'Courier New', monospace;
+                    font-size: 12px;
+                    width: 280px;
+                    margin: 0 auto;
+                    padding: 8px;
+                    color: #000;
+                }
+                .bill-divider { border-top: 1px dashed #000; margin: 6px 0; }
+                .bill-row { display: flex; justify-content: space-between; }
+                .bill-center { text-align: center; }
+                .bill-bold { font-weight: bold; }
+                .bill-total { font-size: 14px; font-weight: bold; }
+            }
+            @media screen { #pos-bill { display: none; } }
+        `}</style>
+        <div className="bill-center bill-bold" style={{ fontSize: 14 }}>THE GRAND BISTRO</div>
+        <div className="bill-center" style={{ fontSize: 11 }}>Restaurant & Dining</div>
+        <div className="bill-center" style={{ fontSize: 10, marginBottom: 4 }}>GST No: 27XXXXX1234Z</div>
+        <div className="bill-divider" />
+        <div className="bill-row"><span>Order#</span><span>{order.order_number}</span></div>
+        <div className="bill-row"><span>Table</span><span>{order.table_number || 'Takeaway'}</span></div>
+        <div className="bill-row"><span>Covers</span><span>{order.cover_count || 1}</span></div>
+        <div className="bill-row"><span>Date</span><span>{new Date().toLocaleDateString('en-IN')}</span></div>
+        <div className="bill-row"><span>Time</span><span>{new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}</span></div>
+        <div className="bill-divider" />
+        <div className="bill-row bill-bold"><span>Item</span><span>Amt</span></div>
+        <div className="bill-divider" />
+        {order.items?.map((item, i) => (
+            <div key={i}>
+                <div>{item.menu_item_name || item.menu_item_id}</div>
+                <div className="bill-row">
+                    <span style={{ paddingLeft: 8 }}>{item.quantity} x ₹{(item.subtotal / item.quantity).toFixed(2)}</span>
+                    <span>₹{item.subtotal?.toFixed(2)}</span>
+                </div>
+            </div>
+        ))}
+        <div className="bill-divider" />
+        <div className="bill-row"><span>Subtotal</span><span>₹{order.subtotal?.toFixed(2)}</span></div>
+        <div className="bill-row"><span>GST (5%)</span><span>₹{order.tax_amount?.toFixed(2)}</span></div>
+        {order.discount_amount > 0 && <div className="bill-row"><span>Discount</span><span>-₹{order.discount_amount?.toFixed(2)}</span></div>}
+        <div className="bill-divider" />
+        <div className="bill-row bill-total"><span>TOTAL</span><span>₹{order.total_amount?.toFixed(2)}</span></div>
+        {order.payment_method && <div className="bill-row" style={{ marginTop: 4 }}><span>Payment</span><span>{order.payment_method.replace('_', ' ').toUpperCase()}</span></div>}
+        <div className="bill-divider" />
+        <div className="bill-center" style={{ fontSize: 11 }}>Thank you for dining with us!</div>
+        <div className="bill-center" style={{ fontSize: 10 }}>Please visit again</div>
+    </div>
+));
+BillPrint.displayName = 'BillPrint';
 
 const PAYMENT_METHODS = [
     { id: 'cash', label: 'Cash', icon: Banknote, color: 'from-green-500 to-emerald-500' },
@@ -30,6 +88,7 @@ export default function OrderDetail() {
     const [amountTendered, setAmountTendered] = useState('');
     const [changeResult, setChangeResult] = useState(null);
     const [updatingStatus, setUpdatingStatus] = useState(false);
+    const billRef = useRef();
 
     const fetchOrder = async () => {
         try {
@@ -73,7 +132,26 @@ export default function OrderDetail() {
         }
     };
 
-    const handlePrint = () => window.print();
+    const handlePrint = () => {
+        // Make bill visible, print, then hide
+        const bill = document.getElementById('pos-bill');
+        if (bill) bill.style.display = 'block';
+        window.print();
+        setTimeout(() => { if (bill) bill.style.display = 'none'; }, 500);
+    };
+
+    const markComplete = async () => {
+        setUpdatingStatus(true);
+        try {
+            await axios.patch(`${API}/waiter/orders/${orderId}/status?new_status=completed`, {}, { headers });
+            await fetchOrder();
+            toast.success('Order closed — table is now free!');
+        } catch {
+            toast.error('Failed to close order');
+        } finally {
+            setUpdatingStatus(false);
+        }
+    };
 
     if (loading) return <div className="text-center text-gray-500 py-20">Loading…</div>;
     if (!order) return null;
@@ -83,6 +161,10 @@ export default function OrderDetail() {
 
     return (
         <div className="max-w-2xl mx-auto">
+            {/* Hidden bill for printing */}
+            <div id="pos-bill-root" style={{ display: 'none' }}>
+                <BillPrint ref={billRef} order={order} />
+            </div>
             {/* Header */}
             <div className="flex items-center gap-3 mb-6">
                 <button onClick={() => navigate(-1)} className="w-9 h-9 rounded-xl bg-gray-800 flex items-center justify-center text-gray-400 hover:text-white">
@@ -111,9 +193,9 @@ export default function OrderDetail() {
                                         onClick={() => !isClosed && i === currentStatusIdx + 1 && updateStatus(s)}
                                         disabled={updatingStatus || isClosed || i !== currentStatusIdx + 1}
                                         className={`px-2.5 py-1.5 rounded-lg text-xs font-medium border whitespace-nowrap transition-all ${isActive ? 'bg-orange-500 border-orange-500 text-white' :
-                                                isDone ? 'bg-green-500/15 border-green-500/30 text-green-400' :
-                                                    i === currentStatusIdx + 1 ? 'border-gray-600 text-gray-400 hover:border-orange-500/50 hover:text-orange-400 cursor-pointer' :
-                                                        'border-gray-800 text-gray-600 cursor-not-allowed'
+                                            isDone ? 'bg-green-500/15 border-green-500/30 text-green-400' :
+                                                i === currentStatusIdx + 1 ? 'border-gray-600 text-gray-400 hover:border-orange-500/50 hover:text-orange-400 cursor-pointer' :
+                                                    'border-gray-800 text-gray-600 cursor-not-allowed'
                                             }`}
                                     >
                                         {isDone ? '✓ ' : ''}{s.charAt(0).toUpperCase() + s.slice(1)}
@@ -174,22 +256,33 @@ export default function OrderDetail() {
             {!isClosed && (
                 <>
                     {!paymentMode ? (
-                        <div className="flex gap-3">
-                            <button
-                                onClick={() => navigate('/waiter/new-order')}
-                                className="flex items-center gap-2 px-4 py-2.5 bg-gray-800 text-white rounded-xl text-sm hover:bg-gray-700"
-                            >
-                                <PlusCircle size={15} /> Add Items
-                            </button>
-                            <button onClick={handlePrint} className="flex items-center gap-2 px-4 py-2.5 bg-gray-800 text-white rounded-xl text-sm hover:bg-gray-700">
-                                <Printer size={15} /> Print
-                            </button>
-                            <button
-                                onClick={() => setPaymentMode(true)}
-                                className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-gradient-to-r from-orange-500 to-amber-500 text-white rounded-xl font-semibold hover:from-orange-600 hover:to-amber-600"
-                            >
-                                <CreditCard size={17} /> Mark as Paid
-                            </button>
+                        <div className="space-y-3">
+                            <div className="flex gap-3">
+                                <button
+                                    onClick={() => navigate('/waiter/new-order')}
+                                    className="flex items-center gap-2 px-4 py-2.5 bg-gray-800 text-white rounded-xl text-sm hover:bg-gray-700"
+                                >
+                                    <PlusCircle size={15} /> Add Items
+                                </button>
+                                <button onClick={handlePrint} className="flex items-center gap-2 px-4 py-2.5 bg-gray-800 text-white rounded-xl text-sm hover:bg-gray-700">
+                                    <Printer size={15} /> Print Bill
+                                </button>
+                                <button
+                                    onClick={() => setPaymentMode(true)}
+                                    className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-gradient-to-r from-orange-500 to-amber-500 text-white rounded-xl font-semibold hover:from-orange-600 hover:to-amber-600"
+                                >
+                                    <CreditCard size={17} /> Mark as Paid
+                                </button>
+                            </div>
+                            {order.status === 'served' && (
+                                <button
+                                    onClick={markComplete}
+                                    disabled={updatingStatus}
+                                    className="w-full flex items-center justify-center gap-2 py-2.5 bg-green-600 text-white rounded-xl font-semibold hover:bg-green-700 disabled:opacity-60"
+                                >
+                                    <CheckCircle2 size={17} /> Close Order & Free Table
+                                </button>
+                            )}
                         </div>
                     ) : (
                         <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5 space-y-4">
@@ -242,8 +335,11 @@ export default function OrderDetail() {
 
             {isClosed && (
                 <div className="text-center py-6 text-gray-500">
-                    <p className="mb-1">Order {order.status === 'completed' ? 'completed' : 'cancelled'}</p>
+                    <p className="mb-1">Order {order.status === 'completed' ? 'completed ✓' : 'cancelled'}</p>
                     {order.payment_method && <p className="text-sm">Paid via <span className="text-white capitalize">{order.payment_method.replace('_', ' ')}</span></p>}
+                    <button onClick={handlePrint} className="mt-3 flex items-center gap-2 px-4 py-2 bg-gray-800 text-white rounded-xl text-sm hover:bg-gray-700 mx-auto">
+                        <Printer size={14} /> Reprint Bill
+                    </button>
                 </div>
             )}
         </div>

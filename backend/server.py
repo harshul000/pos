@@ -308,6 +308,13 @@ async def hotel_sso(request: Request, db: AsyncSession = Depends(get_db)):
         email = payload.get("email") or f"hotel_{hotel_user_id}@dhsolutions.com"
         full_name = payload.get("full_name") or payload.get("name") or "Hotel Guest"
 
+        # Map hotel PMS role → POS role
+        hotel_role = payload.get("role", "")
+        if hotel_role in ("super_admin", "property_admin", "manager", "admin"):
+            pos_role = UserRole.POS_ADMIN
+        else:
+            pos_role = UserRole.STAFF
+
         result = await db.execute(select(UserDB).where(UserDB.external_hotel_user_id == hotel_user_id))
         user = result.scalar_one_or_none()
 
@@ -318,19 +325,24 @@ async def hotel_sso(request: Request, db: AsyncSession = Depends(get_db)):
             if existing_by_email:
                 user = existing_by_email
                 user.external_hotel_user_id = hotel_user_id
+                user.role = pos_role  # update role in case it changed
                 await db.commit()
             else:
                 user = UserDB(
                     id=str(uuid.uuid4()),
                     email=email,
                     full_name=full_name,
-                    role=UserRole.STAFF,
+                    role=pos_role,
                     external_hotel_user_id=hotel_user_id,
                     is_active=True,
                 )
                 db.add(user)
                 await db.commit()
                 await db.refresh(user)
+        else:
+            # Update role in case hotel role changed
+            user.role = pos_role
+            await db.commit()
 
         return Token(
             access_token=create_access_token({"sub": user.id, "email": user.email}),
@@ -1325,6 +1337,14 @@ async def waiter_update_status(
         order.status = OrderStatus(new_status)
     except ValueError:
         raise HTTPException(status_code=400, detail=f"Invalid status: {new_status}")
+
+    # Free the table when order is completed or cancelled
+    if new_status in ("completed", "cancelled") and order.table_id:
+        t_result = await db.execute(select(TableDB).where(TableDB.id == order.table_id))
+        t = t_result.scalar_one_or_none()
+        if t:
+            t.status = TableStatus.AVAILABLE
+
     await db.commit()
     return {"success": True, "status": order.status}
 

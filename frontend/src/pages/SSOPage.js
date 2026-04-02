@@ -30,7 +30,7 @@ export default function SSOPage() {
                 const { access_token } = response.data;
                 localStorage.setItem('token', access_token);
                 setStatus('Login successful! Redirecting to dashboard…');
-                setTimeout(() => navigate('/admin/dashboard'), 500);
+                setTimeout(() => { window.location.href = '/admin/dashboard'; }, 500);
             } catch (err) {
                 console.error('SSO failed:', err);
                 setError('SSO failed. Please log in manually.');
