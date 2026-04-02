@@ -5,7 +5,8 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Search, ChevronDown, ChevronUp } from 'lucide-react';
+import { Search, ChevronDown, ChevronUp, Printer } from 'lucide-react';
+import { printBill } from '@/utils/printBill';
 
 const OrdersList = () => {
   const [orders, setOrders] = useState([]);
@@ -112,6 +113,16 @@ const OrdersList = () => {
                       <span>Total</span>
                       <span>₹{order.total_amount}</span>
                     </div>
+                  </div>
+                  <div className="mt-4 flex justify-end">
+                    <Button
+                      onClick={() => printBill(order)}
+                      variant="outline"
+                      size="sm"
+                      className="flex gap-2 items-center"
+                    >
+                      <Printer size={14} /> Print Bill
+                    </Button>
                   </div>
                 </div>
               )}

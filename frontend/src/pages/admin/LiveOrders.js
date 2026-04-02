@@ -5,6 +5,8 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
+import { Printer } from 'lucide-react';
+import { printBill } from '@/utils/printBill';
 
 const LiveOrders = () => {
   const [orders, setOrders] = useState([]);
@@ -73,14 +75,14 @@ const LiveOrders = () => {
     <AdminLayout>
       <div data-testid="live-orders-page">
         <h1 className="text-3xl font-bold text-slate-900 mb-6">Live Orders / Kitchen Display</h1>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {Object.entries(statusColumns).map(([status, statusOrders]) => (
             <div key={status} className="space-y-3">
               <h2 className="text-lg font-bold capitalize bg-slate-800 text-white p-3 rounded-lg">
                 {status} ({statusOrders.length})
               </h2>
-              
+
               {statusOrders.map(order => (
                 <Card key={order.id} className="p-4 border-l-4 border-l-blue-500" data-testid={`order-card-${order.order_number}`}>
                   <div className="flex items-center justify-between mb-3">
@@ -90,7 +92,7 @@ const LiveOrders = () => {
                     </div>
                     <Badge>{order.order_type}</Badge>
                   </div>
-                  
+
                   <div className="space-y-2 mb-4">
                     {order.items.map((item, idx) => (
                       <div key={idx} className="text-sm">
@@ -98,12 +100,12 @@ const LiveOrders = () => {
                       </div>
                     ))}
                   </div>
-                  
+
                   <div className="flex flex-col gap-2">
                     {status === 'pending' && (
-                      <Button 
-                        onClick={() => updateStatus(order.id, 'confirmed')} 
-                        size="sm" 
+                      <Button
+                        onClick={() => updateStatus(order.id, 'confirmed')}
+                        size="sm"
                         className="w-full"
                         data-testid="confirm-order"
                       >
@@ -111,9 +113,9 @@ const LiveOrders = () => {
                       </Button>
                     )}
                     {status === 'confirmed' && (
-                      <Button 
-                        onClick={() => updateStatus(order.id, 'preparing')} 
-                        size="sm" 
+                      <Button
+                        onClick={() => updateStatus(order.id, 'preparing')}
+                        size="sm"
                         className="w-full"
                         data-testid="start-preparing"
                       >
@@ -121,9 +123,9 @@ const LiveOrders = () => {
                       </Button>
                     )}
                     {status === 'preparing' && (
-                      <Button 
-                        onClick={() => updateStatus(order.id, 'ready')} 
-                        size="sm" 
+                      <Button
+                        onClick={() => updateStatus(order.id, 'ready')}
+                        size="sm"
                         className="w-full"
                         data-testid="mark-ready"
                       >
@@ -131,19 +133,27 @@ const LiveOrders = () => {
                       </Button>
                     )}
                     {status === 'ready' && (
-                      <Button 
-                        onClick={() => updateStatus(order.id, 'served')} 
-                        size="sm" 
+                      <Button
+                        onClick={() => updateStatus(order.id, 'served')}
+                        size="sm"
                         className="w-full bg-green-600 hover:bg-green-700"
                         data-testid="mark-served"
                       >
                         Mark Served
                       </Button>
                     )}
+                    <Button
+                      onClick={() => printBill(order)}
+                      size="sm"
+                      variant="outline"
+                      className="w-full flex gap-2 items-center"
+                    >
+                      <Printer size={14} /> Print Bill
+                    </Button>
                   </div>
                 </Card>
               ))}
-              
+
               {statusOrders.length === 0 && (
                 <div className="text-center py-8 text-slate-500 bg-slate-100 rounded-lg">
                   No {status} orders
